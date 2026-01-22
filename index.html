@@ -23,7 +23,7 @@
             display: flex;
             gap: 20px;
             margin-bottom: 30px;
-            flex-wrap: wrap; /* Helps on mobile */
+            flex-wrap: wrap;
         }
 
         .card {
@@ -165,9 +165,23 @@
 
     <script>
         /* THE BRAIN (JavaScript) */
+
+        // 1. List of Fixed Monthly Expenses
+        const fixedExpenses = [
+            { desc: "Rent", amount: 7500, category: "Utilities" },
+            { desc: "Electricity", amount: 1200, category: "Utilities" },
+            { desc: "Rain Internet", amount: 589, category: "Utilities" },
+            { desc: "Dischem Medical Aid", amount: 1257, category: "Utilities" },
+            { desc: "Sanlam Sky", amount: 458.54, category: "General" },
+            { desc: "Finchoice", amount: 189, category: "General" },
+            { desc: "OpenAI", amount: 149, category: "Entertainment" },
+            { desc: "Canva", amount: 109.99, category: "Entertainment" },
+            { desc: "Apple", amount: 59.99, category: "Entertainment" }
+        ];
+
         let totalBudget = parseFloat(localStorage.getItem("myBudget")) || 0.00;
         let expenses = JSON.parse(localStorage.getItem("myExpenses")) || [];
-        let myChart; // Holds the chart instance
+        let myChart;
 
         function changeBudget() {
             const budgetInput = document.getElementById("new-budget").value;
@@ -180,24 +194,28 @@
         }
 
         function updateDashboard() {
-            let spent = 0;
+            // Calculate Variable Expenses (What you manually log)
+            let variableSpent = 0;
             expenses.forEach(item => {
-                spent += parseFloat(item.amount);
+                variableSpent += parseFloat(item.amount);
             });
 
-            let balance = totalBudget - spent;
+            // Calculate Fixed Expenses (Automated list)
+            let fixedSpent = fixedExpenses.reduce((sum, item) => sum + item.amount, 0);
+            
+            let totalSpent = variableSpent + fixedSpent;
+            let balance = totalBudget - totalSpent;
 
             document.getElementById("display-budget").innerText = "R " + totalBudget.toFixed(2);
-            document.getElementById("display-spent").innerText = "R " + spent.toFixed(2);
+            document.getElementById("display-spent").innerText = "R " + totalSpent.toFixed(2);
             document.getElementById("display-balance").innerText = "R " + balance.toFixed(2);
             
-            // Update the chart every time the numbers change
-            updateChart();
+            updateChart(fixedSpent);
         }
 
-        function updateChart() {
+        function updateChart(fixedTotal) {
             const canvas = document.getElementById('expenseChart');
-            if (!canvas) return; // Guard clause
+            if (!canvas) return;
             const ctx = canvas.getContext('2d');
             
             const categories = ["General", "Food", "Transport", "Utilities", "Entertainment"];
@@ -207,6 +225,10 @@
                     .reduce((sum, item) => sum + parseFloat(item.amount), 0);
             });
 
+            // Add Fixed Costs as its own slice in the pie
+            categories.push("Fixed Bills");
+            dataValues.push(fixedTotal);
+
             if (myChart) { myChart.destroy(); }
 
             myChart = new Chart(ctx, {
@@ -215,7 +237,7 @@
                     labels: categories,
                     datasets: [{
                         data: dataValues,
-                        backgroundColor: ['#bdc3c7', '#f1c40f', '#e67e22', '#3498db', '#9b59b6']
+                        backgroundColor: ['#bdc3c7', '#f1c40f', '#e67e22', '#3498db', '#9b59b6', '#2c3e50']
                     }]
                 },
                 options: {
