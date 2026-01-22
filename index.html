@@ -2,16 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Personal Tracker</title>
+    <title>Connor's Tracker</title>
     
     <style>
         /* THE LOOK (CSS) */
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-    background-color: #e0eafc; /* This is a soft blue */
-    padding: 40px;
-    color: #333;
-}
+            background-color: #8aedf8; 
+            padding: 40px;
+            color: #333;
+        }
+
+        /* This is the magic frame that keeps everything centered */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
         .dashboard {
@@ -42,8 +47,8 @@
             margin: 10px 0 0;
         }
 
-        #display-balance { color: #2ecc71; } /* Green */
-        #display-spent { color: #e74c3c; }   /* Red */
+        #display-balance { color: #2ecc71; }
+        #display-spent { color: #e74c3c; }
 
         .input-area {
             background: white;
@@ -89,7 +94,7 @@
             margin-top: 20px;
         }
 
-        .clear-btn:hover { background-color: #2d3436; }
+        .clear-btn:hover { background-color: #01171d; }
 
         table {
             width: 100%;
@@ -119,69 +124,67 @@
     </style>
 </head>
 <body>
+    <div class="container"> <h1>Connor's Financial Dashboard</h1>
 
-    <h1>Tanya's Financial Dashboard</h1>
-    <div class="dashboard">
-        <div class="card">
-            <h3>Total Budget</h3>
-            <p id="display-budget">R 0.00</p>
+        <div class="dashboard">
+            <div class="card">
+                <h3>Total Budget</h3>
+                <p id="display-budget">R 0.00</p>
+            </div>
+            <div class="card">
+                <h3>Total Spent</h3>
+                <p id="display-spent">R 0.00</p>
+            </div>
+            <div class="card">
+                <h3>Balance</h3>
+                <p id="display-balance">R 0.00</p>
+            </div>
         </div>
-        <div class="card">
-            <h3>Total Spent</h3>
-            <p id="display-spent">R 0.00</p>
+
+        <div class="input-area">
+            <h3>Budget Settings</h3>
+            <input type="number" id="new-budget" placeholder="Set Monthly Budget (R)">
+            <button class="add-btn" onclick="changeBudget()">Update Total Budget</button>
         </div>
-        <div class="card">
-            <h3>Balance</h3>
-            <p id="display-balance">R 0.00</p>
+
+        <div class="input-area">
+            <h3>Add New Expense</h3>
+            <input type="text" id="desc" placeholder="What did you buy?">
+            <input type="number" id="amount" placeholder="Amount (R)">
+            <input type="date" id="date">
+            
+            <select id="category">
+                <option value="General">General</option>
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Entertainment">Entertainment</option>
+            </select>
+
+            <button class="add-btn" onclick="addExpense()">Add Expense</button>
         </div>
-    </div>
 
-    <div class="input-area">
-        <h3>Budget Settings</h3>
-        <input type="number" id="new-budget" placeholder="Set Monthly Budget (R)">
-        <button class="add-btn" onclick="changeBudget()">Update Total Budget</button>
-    </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="expense-body"></tbody>
+        </table>
 
-    <div class="input-area">
-        <h3>Add New Expense</h3>
-        <input type="text" id="desc" placeholder="What did you buy?">
-        <input type="number" id="amount" placeholder="Amount (R)">
-        <input type="date" id="date">
-        
-        <select id="category">
-            <option value="General">General</option>
-            <option value="Food">Food</option>
-            <option value="Transport">Transport</option>
-            <option value="Utilities">Utilities</option>
-            <option value="Entertainment">Entertainment</option>
-        </select>
+        <button onclick="downloadCSV()" class="add-btn" style="background-color: #27ae60; margin-top: 20px;">Download to Excel</button>
+        <button onclick="clearAll()" class="clear-btn">Clear All Data</button>
 
-        <button class="add-btn" onclick="addExpense()">Add Expense</button>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="expense-body"></tbody>
-    </table>
-<button onclick="downloadCSV()" class="add-btn" style="background-color: #27ae60; margin-top: 20px;">Download to Excel</button>
-    <button onclick="clearAll()" class="clear-btn">Clear All Data</button>
-
-    <script>
+    </div> <script>
         /* THE BRAIN (JavaScript) */
-
-        // 1. Create or Load the Data
         let totalBudget = parseFloat(localStorage.getItem("myBudget")) || 0.00;
         let expenses = JSON.parse(localStorage.getItem("myExpenses")) || [];
 
-        // 2. The Logic to Change Budget
         function changeBudget() {
             const budgetInput = document.getElementById("new-budget").value;
             if(budgetInput) {
@@ -192,7 +195,6 @@
             }
         }
 
-        // 3. The Logic to Calculate Totals
         function updateDashboard() {
             let spent = 0;
             expenses.forEach(item => {
@@ -206,7 +208,6 @@
             document.getElementById("display-balance").innerText = "R " + balance.toFixed(2);
         }
 
-        // 4. The Logic to Draw the Table
         function renderTable() {
             const tbody = document.getElementById("expense-body");
             tbody.innerHTML = ""; 
@@ -224,7 +225,6 @@
             });
         }
 
-        // 5. The Logic to Add a New Expense
         function addExpense() {
             const desc = document.getElementById("desc").value;
             const amount = document.getElementById("amount").value;
@@ -234,13 +234,9 @@
             if(desc && amount && date) {
                 const newEntry = { desc, amount, date, category, id: Date.now() };
                 expenses.push(newEntry);
-                
-                // Save and Refresh
                 localStorage.setItem("myExpenses", JSON.stringify(expenses));
                 renderTable();
                 updateDashboard();
-
-                // Clear Input Boxes
                 document.getElementById("desc").value = "";
                 document.getElementById("amount").value = "";
                 document.getElementById("date").value = "";
@@ -249,7 +245,6 @@
             }
         }
 
-        // 6. The Logic to Delete
         function deleteExpense(id) {
             expenses = expenses.filter(item => item.id !== id);
             localStorage.setItem("myExpenses", JSON.stringify(expenses));
@@ -257,7 +252,6 @@
             updateDashboard();
         }
 
-        // 7. The Logic to Clear All
         function clearAll() {
             if(confirm("Are you sure you want to delete everything?")) {
                 expenses = [];
@@ -267,20 +261,11 @@
             }
         }
 
-        // 8. Run on Startup
-        renderTable(); 
-        updateDashboard();
-
         function downloadCSV() {
-            // 1. Create the Header of your Excel sheet
             let csvContent = "Date,Category,Description,Amount\n";
-
-            // 2. Add every expense row to the text
             expenses.forEach(item => {
                 csvContent += `${item.date},${item.category},${item.desc},${item.amount}\n`;
             });
-
-            // 3. Create a hidden "download link" and click it automatically
             const blob = new Blob([csvContent], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -290,7 +275,10 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        } // This was the missing bracket!
+        }
+
+        renderTable(); 
+        updateDashboard();
     </script>
 </body>
 </html>
